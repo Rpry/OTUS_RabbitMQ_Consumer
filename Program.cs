@@ -1,4 +1,5 @@
-﻿using Consumer.Settings;
+﻿using System.Threading.Tasks;
+using Consumer.Settings;
 using Microsoft.Extensions.Configuration;
 using RabbitMQ.Client;
 
@@ -6,7 +7,7 @@ namespace Consumer
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             IConfiguration configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -14,15 +15,15 @@ namespace Consumer
 
             var consumerNumber = int.Parse(args[0]);
 
-            var connection = GetRabbitConnection(configuration);
-            var channel = connection.CreateModel();
+            var connection = await GetRabbitConnection(configuration);
+            var channel = await connection.CreateChannelAsync();
             
-            Consumers.Consumer.Register(channel, $"exchange.direct", $"queue.direct_{consumerNumber}",  $"cars.{consumerNumber}");
-            //Consumers.Consumer.Register(channel, $"exchange.fanout", $"queue.fanout_{consumerNumber}",  $"cars.{consumerNumber}");
+            await Consumers.Consumer.Register(channel, $"exchange.direct", $"queue.direct_{consumerNumber}", $"cars.{consumerNumber}");
+            //Consumers.Consumer.Register(channel, $"exchange.fanout", $"queue.fanout_{consumerNumber}", $"cars.{consumerNumber}");
             //Consumers.Consumer.Register(channel, $"exchange.topic", $"queue.topic_{consumerNumber}",  consumerNumber > 2 ? "*.1": $"cars.{consumerNumber}");
         }
         
-        private static IConnection GetRabbitConnection(IConfiguration configuration)
+        private static async Task<IConnection> GetRabbitConnection(IConfiguration configuration)
         {
             var rmqSettings = configuration.Get<ApplicationSettings>().RmqSettings;
             ConnectionFactory factory = new ConnectionFactory
@@ -32,7 +33,7 @@ namespace Consumer
                 UserName = rmqSettings.Login,
                 Password = rmqSettings.Password,
             };
-            IConnection conn = factory.CreateConnection();
+            IConnection conn = await factory.CreateConnectionAsync();
             return conn;
         }
     }
