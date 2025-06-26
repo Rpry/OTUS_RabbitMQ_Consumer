@@ -19,8 +19,8 @@ namespace Consumer
             var channel = await connection.CreateChannelAsync();
             
             await Consumers.Consumer.Register(channel, $"exchange.direct", $"queue.direct_{consumerNumber}", $"cars.{consumerNumber}");
-            //Consumers.Consumer.Register(channel, $"exchange.fanout", $"queue.fanout_{consumerNumber}", $"cars.{consumerNumber}");
-            //Consumers.Consumer.Register(channel, $"exchange.topic", $"queue.topic_{consumerNumber}",  consumerNumber > 2 ? "*.1": $"cars.{consumerNumber}");
+            //await Consumers.Consumer.Register(channel, $"exchange.fanout", $"queue.fanout_{consumerNumber}", $"cars.{consumerNumber}");
+            //await Consumers.Consumer.Register(channel, $"exchange.topic", $"queue.topic_{consumerNumber}",  consumerNumber > 2 ? "*.1": $"cars.{consumerNumber}");
         }
         
         private static async Task<IConnection> GetRabbitConnection(IConfiguration configuration)
